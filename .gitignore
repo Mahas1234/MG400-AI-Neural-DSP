@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+dist/
+build/
+*.spec
+.env
+.venv
+env/
+venv/
+*.db
+logs/
+
+# Next.js
+web/node_modules/
+web/.next/
+web/out/
+web/.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
