@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^7.5.0",
+    "@capacitor/core": "^8.1.0",
     "@google/generative-ai": "^0.24.1",
     "framer-motion": "^12.34.3",
     "lucide-react": "^0.575.0",

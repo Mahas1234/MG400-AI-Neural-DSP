@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MG400 AI Generator</string>
+    <string name="title_activity_main">MG400 AI Generator</string>
+    <string name="package_name">com.mg400.ai</string>
+    <string name="custom_url_scheme">com.mg400.ai</string>
+</resources>

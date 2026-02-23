@@ -73,6 +73,37 @@ class MidiClient:
         except Exception as e:
             raise RuntimeError(f"Error transmitting parameters over MIDI to MG-400: {e}")
 
+    def send_patch_name(self, name: str):
+        """
+        Transmits the patch identity to the physical MG-400 display 
+        via proprietary SysEx command.
+        Format: F0 00 20 72 01 07 (Header) 00 00 00 10 (Len) <chars> F7
+        """
+        if not self.outport:
+            try:
+                self.connect()
+            except:
+                return False # Silent fail if not connected
+
+        try:
+            # NUX/Cherub SysEx Header (without F0/F7 for mido data)
+            # 00 20 72 (Mfr) 01 (Model) 07 (CMD) 00 00 00 10 (ADDR/LEN)
+            header = [0x00, 0x20, 0x72, 0x01, 0x07, 0x00, 0x00, 0x00, 0x10]
+            
+            # ASCII Name Payload (16 byte safe buffer)
+            safe_name = name.upper()[:16].ljust(16)
+            name_bytes = [ord(c) for c in safe_name]
+            
+            # Construct and fire
+            full_data = header + name_bytes
+            msg = mido.Message('sysex', data=full_data)
+            self.outport.send(msg)
+            logging.info(f"Identity Propagation Successful: Transmitted '{name}' to Hardware.")
+            return True
+        except Exception as e:
+            logging.error(f"Identity Propagation Failed: {e}")
+            return False
+
     def close(self):
         """Closes the MIDI port safely."""
         self.stop_listening()

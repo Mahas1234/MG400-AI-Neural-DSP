@@ -18,6 +18,11 @@ web/.next/
 web/out/
 web/.env*.local
 
+# Mobile Build
+.buildozer/
+mobile_build/
+bin/
+
 # OS
 .DS_Store
 Thumbs.db

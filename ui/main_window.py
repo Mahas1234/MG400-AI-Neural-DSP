@@ -132,6 +132,7 @@ class MainWindow(QMainWindow):
         self.generated_params = {}
         self.db = ToneLibrary()
         self.midi = MidiClient()
+        self.current_patch_name = "NEURAL-01"
         self.midi_signals = MidiSignals()
         self.reverse_cc_map = {v: k for k, v in MIDI_CC_MAP.items()}
         self.sliders = {} # Connect CC names to QSlider instances
@@ -299,6 +300,14 @@ class MainWindow(QMainWindow):
         
         top_layout.addWidget(self.btn_load_template)
         top_layout.addWidget(self.lbl_template, stretch=1)
+        
+        self.txt_patch_name = QLineEdit(self.current_patch_name)
+        self.txt_patch_name.setFixedWidth(120)
+        self.txt_patch_name.setPlaceholderText("PATCH NAME")
+        self.txt_patch_name.textChanged.connect(lambda t: setattr(self, 'current_patch_name', t.upper()))
+        top_layout.addWidget(QLabel("Name:"))
+        top_layout.addWidget(self.txt_patch_name)
+
         top_layout.addWidget(QLabel("API Key:"))
         top_layout.addWidget(self.txt_api_key)
         main_layout.addLayout(top_layout)
@@ -462,12 +471,16 @@ class MainWindow(QMainWindow):
         self.thread.start()
 
     def _on_gen_fin(self, params):
+        if "patchName" in params:
+            self.current_patch_name = params["patchName"].upper()
+            self.txt_patch_name.setText(self.current_patch_name)
+            
         self.generated_params = params
         self.txt_params.setText(json.dumps(params, indent=4))
         self._build_dashboard(params)
         self.btn_gen.setEnabled(True)
         self.btn_remix.setEnabled(True)
-        self.log_message("Successfully compiled AI mapping.")
+        self.log_message(f"Successfully compiled AI mapping: {self.current_patch_name}")
 
     def _build_dashboard(self, params):
         while self.preview_layout.count():
@@ -579,16 +592,19 @@ class MainWindow(QMainWindow):
         if sn:
             enc = BinaryEncoder(self.template_path)
             enc.load_template()
-            enc.apply_parameters(self.generated_params)
+            full_params = self.generated_params.copy()
+            full_params["name"] = self.current_patch_name
+            enc.apply_parameters(full_params)
             enc.export_patch(sn)
             self.log_message(f"Exported physically: {sn}")
 
     def send_to_device(self):
         if not self.generated_params: return
         try:
+            self.midi.send_patch_name(self.current_patch_name)
             self.midi.send_cc_parameters(self.generated_params, MIDI_CC_MAP)
             self._fire_global_sync(self.generated_params)
-            self.log_message("Wholesale sync complete across Hardware and Global Mobile Clients.")
+            self.log_message(f"Synced '{self.current_patch_name}' to hardware & neural cloud.")
         except Exception as e:
             self.log_message(f"Hardware push fail: {e}")
 

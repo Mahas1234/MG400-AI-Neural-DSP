@@ -67,6 +67,27 @@ class BinaryEncoder:
                     logging.error(f"Invalid integer formatting '{value}' passed for parameter '{key}'. Ignored.")
             else:
                 logging.info(f"Parameter semantic '{key}' not found in OFFSET_MAP mappings. Excluded from patch encoding.")
+        
+        # Special handling for patch name at offset 0x6D
+        if "name" in params:
+            self.apply_name(params["name"])
+
+    def apply_name(self, name: str) -> None:
+        """
+        Hardcodes the ASCII identity of the patch into the binary structure at offset 0x6D.
+        This offset is standardized across MG-400 neural configs.
+        """
+        if not self.patch_data:
+            return
+            
+        # Standard MG-400 name field is 16 characters
+        padded_name = name.upper()[:16].ljust(16)
+        name_bytes = padded_name.encode('ascii', 'ignore')
+        
+        for i, b in enumerate(name_bytes):
+            offset = 0x6D + i
+            if offset < len(self.patch_data):
+                self.patch_data[offset] = b
                 
     def export_patch(self, output_path: str) -> None:
         """Exports the modified binary bytearray safely to an external valid .mg400patch file."""

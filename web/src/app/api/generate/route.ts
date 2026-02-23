@@ -24,7 +24,8 @@ export async function POST(req: Request) {
 Extract requested sonic characteristics from the user's prompt and map them to a highly calculated JSON object of processor parameters.
 Return ONLY valid JSON. Think like a studio engineer balancing dynamic range, parametric EQ curves, and spatial effects.
 All valid parameter keys you can output are: ${availableParams}.
-Each parameter must be critically evaluated and output as a precise integer value between 0.0 and 127.0.`;
+Each parameter must be critically evaluated and output as a precise integer value between 0.0 and 127.0.
+Also include a "patchName" field (max 10 characters, uppercase string) that creatively summarizes the generated tone profile.`;
 
         let fullPrompt = `${systemPrompt}\n\nClient/Producer prompt:\n${prompt}`;
 
